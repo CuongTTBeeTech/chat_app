@@ -189,6 +189,9 @@
                                                 <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" editable="NO" text="opposite message" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cmp-Ls-yly">
                                                     <rect key="frame" x="10" y="17" width="303" height="33"/>
                                                     <color key="backgroundColor" systemColor="systemGray4Color"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" id="N9E-dp-8ny"/>
+                                                    </constraints>
                                                     <color key="textColor" systemColor="labelColor"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>

@@ -36,7 +36,8 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         tableViewChat.transform = CGAffineTransform(rotationAngle: -(CGFloat)(Double.pi))
         
         textFieldMessage.layer.cornerRadius = 8
-        textFieldMessage.textContainer.maximumNumberOfLines = 6
+        textFieldMessage.textContainer.maximumNumberOfLines = 10
+        textFieldMessage.delegate = self
         
         // get messages
         getMessages()

@@ -55,6 +55,9 @@ extension ChatViewController: UITableViewDataSource, UITableViewDelegate {
             let oppositeCellText = tableView.dequeueReusableCell(withIdentifier: "opposite_text", for: indexPath) as! OppositeTextMessageTableViewCell
             // message
             oppositeCellText.lbMessage?.text = listChat[indexPath.row].message
+            let fixedWidth = oppositeCellText.lbMessage.frame.size.width
+            let newSize = oppositeCellText.lbMessage.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude))
+            oppositeCellText.lbMessage.frame.size = CGSize(width: max(newSize.width, fixedWidth), height: newSize.height)
             // create time
             let createTime: String = String(String(describing: NSDate(timeIntervalSince1970: TimeInterval(listChat[indexPath.row].createTime))).dropLast(5))
             oppositeCellText.lbCreateTime?.text = createTime
@@ -64,6 +67,9 @@ extension ChatViewController: UITableViewDataSource, UITableViewDelegate {
             let selfCellText = tableView.dequeueReusableCell(withIdentifier: "self_text", for: indexPath) as! SelfTextMessageTableViewCell
             // message
             selfCellText.lbMessage?.text = listChat[indexPath.row].message
+            let fixedWidth = selfCellText.lbMessage.frame.size.width
+            let newSize = selfCellText.lbMessage.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude))
+            selfCellText.lbMessage.frame.size = CGSize(width: max(newSize.width, fixedWidth), height: newSize.height)
             // create time
             let createTime: String = String(String(describing: NSDate(timeIntervalSince1970: TimeInterval(listChat[indexPath.row].createTime))).dropLast(5))
             selfCellText.lbCreateTime?.text = createTime
@@ -102,6 +108,25 @@ extension ChatViewController: UITableViewDataSource, UITableViewDelegate {
     
 }
 
+extension ChatViewController: UITextViewDelegate {
+    func textViewDidChange(_ textView: UITextView) {
+        guard let lineHeight = textFieldMessage.font?.lineHeight else {
+            return
+        }
+        let numberOfLines = textFieldMessage.contentSize.height / lineHeight
+
+        switch numberOfLines {
+        case 0...10:
+            // disable scroll
+            textFieldMessage.isScrollEnabled = false
+        default:
+            print("")
+            // enable scroll
+//            textFieldMessage.isScrollEnabled = true
+//            textFieldMessage.contentSize = CGSize(width: UIScreen.main.bounds.width, height: CGFloat(lineHeight * 5))
+        }
+    }
+}
 
 extension ListUsersViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
