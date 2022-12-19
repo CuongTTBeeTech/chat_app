@@ -12,8 +12,8 @@ import FirebaseStorage
 class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     @IBOutlet weak var tableViewChat: UITableView!
-    
-    @IBOutlet weak var textFieldMessage: UITextField!
+    @IBOutlet weak var viewChat: UIView!
+    @IBOutlet weak var textFieldMessage: UITextView!
     
     let db = Firestore.firestore()
     let storage = Storage.storage().reference()
@@ -32,25 +32,21 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         // Do any additional setup after loading the view.
         self.title = userOpposite.username
         
-        //        print("userIdSelf: \(userSelf!)  --  userIdOpposite: \(userOpposite!)")
         tableViewChat.dataSource = self
         tableViewChat.transform = CGAffineTransform(rotationAngle: -(CGFloat)(Double.pi))
         
-        //        db.collection("chat_group").document("\(userSelf.username)-\(userSelf.userId)").collection("picky1Id1-pickyId2").getDocuments()
+        textFieldMessage.layer.cornerRadius = 8
+        textFieldMessage.textContainer.maximumNumberOfLines = 6
         
         // get messages
         getMessages()
-        
         
     }
     
     func getMessages() {
         //            .addSnapshotListener({ docSnapshot, err in})
-        
-//        db.collection("chat_group").document("\(self.userSelf.username)-\(self.userSelf.userId)")
-//            .collection("\(self.userSelf.userId)-\(self.userOpposite.userId)").order(by: "createTime", descending: true).getDocuments() { (querySnapshot, err) in
         db.collection("chat_group").document("\(self.userSelf.username)-\(self.userSelf.userId)")
-            .collection("\(self.userSelf.userId)-\(self.userOpposite.userId)").order(by: "createTime", descending: true).addSnapshotListener() { (querySnapshot, err) in
+            .collection("\(self.userSelf.userId)-\(self.userOpposite.userId)").order(by: "createTime", descending: true).getDocuments() { (querySnapshot, err) in
                 if let err = err {
                     print("Error getting documents: \(err)")
                 } else {
@@ -70,46 +66,42 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     
     
     @IBAction func didTabSendMessage(_ sender: Any) {
-        let mess = textFieldMessage.text ?? ""
-        if mess.isEmpty {
+        guard let mess = textFieldMessage.text else {
             return
         }
         
-        do {
-            let timeStamp = Int(Date().timeIntervalSince1970)
-            
-            let itemChat: [String: Any] = [
-                "createTime": timeStamp,
-                "id": timeStamp,
-                "message": mess,
-                "type": 2,
-                "userOppositeId": self.userOpposite.userId,
-                "userSelfId": self.userSelf.userId
-            ]
-            
-            db.collection("chat_group").document("\(self.userSelf.username)-\(self.userSelf.userId)").collection("\(self.userSelf.userId)-\(self.userOpposite.userId)").addDocument(data: itemChat)
-            
-            // add Another document for opposite
-            let itemChatOpposite: [String: Any] = [
-                "createTime": timeStamp,
-                "id": timeStamp,
-                "message": mess,
-                "type": 1,
-                "userOppositeId": self.userSelf.userId,
-                "userSelfId": self.userOpposite.userId
-            ]
-            db.collection("chat_group").document("\(self.userOpposite.username)-\(self.userOpposite.userId)").collection("\(self.userOpposite.userId)-\(self.userSelf.userId)")
-                .addDocument(data: itemChatOpposite)
-            
-            let item = ChatItem(id: timeStamp, userSelfId: self.userSelf.userId, userOppositeId: self.userOpposite.userId, message: mess, type: 2, createTime: timeStamp)
-            self.listChat.insert(item, at: 0)
-            textFieldMessage.text = ""
-            
-            tableViewChat.reloadData()
-            
-        } catch {
-            print("Error writing to Firestore: \(error)")
-        }
+        let timeStamp = Int(Date().timeIntervalSince1970)
+        
+        let itemChat: [String: Any] = [
+            "createTime": timeStamp,
+            "id": timeStamp,
+            "message": mess,
+            "type": 2,
+            "userOppositeId": self.userOpposite.userId,
+            "userSelfId": self.userSelf.userId
+        ]
+        
+        db.collection("chat_group").document("\(self.userSelf.username)-\(self.userSelf.userId)").collection("\(self.userSelf.userId)-\(self.userOpposite.userId)").addDocument(data: itemChat)
+        
+        // add Another document for opposite
+        let itemChatOpposite: [String: Any] = [
+            "createTime": timeStamp,
+            "id": timeStamp,
+            "message": mess,
+            "type": 1,
+            "userOppositeId": self.userSelf.userId,
+            "userSelfId": self.userOpposite.userId
+        ]
+        db.collection("chat_group").document("\(self.userOpposite.username)-\(self.userOpposite.userId)").collection("\(self.userOpposite.userId)-\(self.userSelf.userId)")
+            .addDocument(data: itemChatOpposite)
+        
+        // insert to table view
+        let item = ChatItem(id: timeStamp, userSelfId: self.userSelf.userId, userOppositeId: self.userOpposite.userId, message: mess, type: 2, createTime: timeStamp)
+        self.listChat.insert(item, at: 0)
+        textFieldMessage.text = ""
+        
+        tableViewChat.reloadData()
+        
     }
     
     @IBAction func didTabSelectImage(_ sender: Any) {
@@ -154,63 +146,52 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         
         
         let timeStamp = Int(Date().timeIntervalSince1970)
-//        storage.child("images/file.png").putData(imageData, metadata: nil, completion: {_, error in
         storage.child("images/img_chat_\(self.userSelf.userId)_\(self.userOpposite.userId)_\(timeStamp).png").putData(imageData, metadata: nil, completion: {_, error in
             guard error == nil else {
                 print("Failed to upload")
                 return
             }
-
+            
             self.storage.child("images/img_chat_\(self.userSelf.userId)_\(self.userOpposite.userId)_\(timeStamp).png").downloadURL(completion: {url, error in
                 guard let url = url, error == nil else {
                     return
                 }
-
+                
                 let urlString = url.absoluteString
                 print("Download url: \(urlString)")
-
+                
                 // send message
-
-                do {
-
-                    let itemChat: [String: Any] = [
-                        "createTime": timeStamp,
-                        "id": timeStamp,
-                        "message": urlString,
-                        "type": 4,
-                        "userOppositeId": self.userOpposite.userId,
-                        "userSelfId": self.userSelf.userId
-                    ]
-
-                    self.db.collection("chat_group").document("\(self.userSelf.username)-\(self.userSelf.userId)").collection("\(self.userSelf.userId)-\(self.userOpposite.userId)").addDocument(data: itemChat)
-
-                    // add Another document for opposite
-                    let itemChatOpposite: [String: Any] = [
-                        "createTime": timeStamp,
-                        "id": timeStamp,
-                        "message": urlString,
-                        "type": 3,
-                        "userOppositeId": self.userSelf.userId,
-                        "userSelfId": self.userOpposite.userId
-                    ]
-                    self.db.collection("chat_group").document("\(self.userOpposite.username)-\(self.userOpposite.userId)").collection("\(self.userOpposite.userId)-\(self.userSelf.userId)")
-                        .addDocument(data: itemChatOpposite)
-
-                    let item = ChatItem(id: timeStamp, userSelfId: self.userSelf.userId, userOppositeId: self.userOpposite.userId, message: urlString, type: 4, createTime: timeStamp)
-                    self.listChat.insert(item, at: 0)
-                    self.textFieldMessage.text = ""
-
-                    self.tableViewChat.reloadData()
-
-                } catch {
-                    print("Error writing to Firestore: \(error)")
-                }
+                let itemChat: [String: Any] = [
+                    "createTime": timeStamp,
+                    "id": timeStamp,
+                    "message": urlString,
+                    "type": 4,
+                    "userOppositeId": self.userOpposite.userId,
+                    "userSelfId": self.userSelf.userId
+                ]
+                
+                self.db.collection("chat_group").document("\(self.userSelf.username)-\(self.userSelf.userId)").collection("\(self.userSelf.userId)-\(self.userOpposite.userId)").addDocument(data: itemChat)
+                
+                // add Another document for opposite
+                let itemChatOpposite: [String: Any] = [
+                    "createTime": timeStamp,
+                    "id": timeStamp,
+                    "message": urlString,
+                    "type": 3,
+                    "userOppositeId": self.userSelf.userId,
+                    "userSelfId": self.userOpposite.userId
+                ]
+                self.db.collection("chat_group").document("\(self.userOpposite.username)-\(self.userOpposite.userId)").collection("\(self.userOpposite.userId)-\(self.userSelf.userId)")
+                    .addDocument(data: itemChatOpposite)
+                
+                // insert to tableview
+                let item = ChatItem(id: timeStamp, userSelfId: self.userSelf.userId, userOppositeId: self.userOpposite.userId, message: urlString, type: 4, createTime: timeStamp)
+                self.textFieldMessage.text = ""
+                self.listChat.insert(item, at: 0)
+                self.tableViewChat.reloadData()
             })
         })
         
-        // upload image data
-        // get download url
-        // save download url to userDefaults
     }
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {

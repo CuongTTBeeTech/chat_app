@@ -9,12 +9,18 @@ import UIKit
 
 class SelfTextMessageTableViewCell: UITableViewCell {
 
-    @IBOutlet weak var lbMessage: UILabel!
     @IBOutlet weak var lbCreateTime: UILabel!
+    
+    @IBOutlet weak var lbMessage: UITextView!
+    
     
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
+        
+        lbMessage.layer.cornerRadius = 8
+        
+        lbMessage.textContainer.maximumNumberOfLines = 0
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

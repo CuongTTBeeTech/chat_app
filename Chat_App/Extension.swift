@@ -53,33 +53,42 @@ extension ChatViewController: UITableViewDataSource, UITableViewDelegate {
         switch listChat[indexPath.row].type {
         case 1:
             let oppositeCellText = tableView.dequeueReusableCell(withIdentifier: "opposite_text", for: indexPath) as! OppositeTextMessageTableViewCell
+            // message
             oppositeCellText.lbMessage?.text = listChat[indexPath.row].message
-            oppositeCellText.lbCreateTime?.text = String(describing: NSDate(timeIntervalSince1970: TimeInterval(listChat[indexPath.row].createTime)))
+            // create time
+            let createTime: String = String(String(describing: NSDate(timeIntervalSince1970: TimeInterval(listChat[indexPath.row].createTime))).dropLast(5))
+            oppositeCellText.lbCreateTime?.text = createTime
             oppositeCellText.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
             return oppositeCellText
         case 2:
             let selfCellText = tableView.dequeueReusableCell(withIdentifier: "self_text", for: indexPath) as! SelfTextMessageTableViewCell
+            // message
             selfCellText.lbMessage?.text = listChat[indexPath.row].message
-            selfCellText.lbCreateTime?.text = String(describing: NSDate(timeIntervalSince1970: TimeInterval(listChat[indexPath.row].createTime)))
+            // create time
+            let createTime: String = String(String(describing: NSDate(timeIntervalSince1970: TimeInterval(listChat[indexPath.row].createTime))).dropLast(5))
+            selfCellText.lbCreateTime?.text = createTime
             selfCellText.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
             return selfCellText
         case 3:
             let oppositeCellImage = tableView.dequeueReusableCell(withIdentifier: "opposite_img", for: indexPath) as! OppositeImageMessageTableViewCell
+            // image
             let urlString = listChat[indexPath.row].message
             let url = URL(string: urlString)
             oppositeCellImage.img.af.setImage(withURL: url!)
-            
-//            oppositeCellImage.img?.image = UIImage(url: URL(string: listChat[indexPath.row].message))
-            oppositeCellImage.labelCreateTime.text = String(describing: NSDate(timeIntervalSince1970: TimeInterval(listChat[indexPath.row].createTime)))
+            // create time
+            let createTime: String = String(String(describing: NSDate(timeIntervalSince1970: TimeInterval(listChat[indexPath.row].createTime))).dropLast(5))
+            oppositeCellImage.labelCreateTime.text = createTime
             oppositeCellImage.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
             return oppositeCellImage
         case 4:
             let selfCellImage = tableView.dequeueReusableCell(withIdentifier: "self_img", for: indexPath) as! SelfImageMessageTableViewCell
+            // image
             let urlString = listChat[indexPath.row].message
             let url = URL(string: urlString)
             selfCellImage.img.af.setImage(withURL: url!)
-//            selfCellImage.img?.image = UIImage(url: URL(string: listChat[indexPath.row].message))
-            selfCellImage.labelCreateTime.text = String(describing: NSDate(timeIntervalSince1970: TimeInterval(listChat[indexPath.row].createTime)))
+            // create time
+            let createTime: String = String(String(describing: NSDate(timeIntervalSince1970: TimeInterval(listChat[indexPath.row].createTime))).dropLast(5))
+            selfCellImage.labelCreateTime.text = createTime
             selfCellImage.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
             return selfCellImage
         default:
@@ -117,52 +126,6 @@ extension ListUsersViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-extension UIImage {
-    convenience init?(url: URL?) {
-        guard let url = url else { return nil }
-        
-        do {
-            self.init(data: try Data(contentsOf: url))
-        } catch {
-            print("Cannot load image from url: \(url) with error: \(error)")
-            return nil
-        }
-    }
-}
-
-extension UIImageView {
-
-    
-        func imageFromServerURL(_ URLString: String, placeHolder: UIImage?) {
-
-        self.image = nil
-        //If imageurl's imagename has space then this line going to work for this
-        let imageServerUrl = URLString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        
-
-        if let url = URL(string: imageServerUrl) {
-            URLSession.shared.dataTask(with: url, completionHandler: { (data, response, error) in
-
-                //print("RESPONSE FROM API: \(response)")
-                if error != nil {
-                    print("ERROR LOADING IMAGES FROM URL: \(String(describing: error))")
-                    DispatchQueue.main.async {
-                        self.image = placeHolder
-                    }
-                    return
-                }
-                DispatchQueue.main.async {
-                    if let data = data {
-                        if let downloadedImage = UIImage(data: data) {
-                       
-                            self.image = downloadedImage
-                        }
-                    }
-                }
-            }).resume()
-        }
-    }
-}
 
 extension Date {
     var millisecondsSince1970:Int64 {
