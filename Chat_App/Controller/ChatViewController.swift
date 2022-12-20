@@ -20,8 +20,8 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     
     // 1 left other
     // 2 right self
-    var userOpposite: User!
-    var userSelf: User!
+    var userOpposite: User?
+    var userSelf: User?
     
     var listChat: [ChatItem] = []
     var imagePicker = UIImagePickerController()
@@ -30,6 +30,9 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         super.viewDidLoad()
         
         // Do any additional setup after loading the view.
+        guard let userOpposite = self.userOpposite else {
+            return
+        }
         self.title = userOpposite.username
         
         tableViewChat.dataSource = self
@@ -46,14 +49,23 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     
     func getMessages() {
         //            .addSnapshotListener({ docSnapshot, err in})
-        db.collection("chat_group").document("\(self.userSelf.username)-\(self.userSelf.userId)")
-            .collection("\(self.userSelf.userId)-\(self.userOpposite.userId)").order(by: "createTime", descending: true).getDocuments() { (querySnapshot, err) in
+        guard let userSelf = self.userSelf else {
+            return
+        }
+        guard let userOpposite = self.userOpposite else {
+            return
+        }
+        db.collection("chat_group").document("\(userSelf.username)-\(userSelf.userId)")
+            .collection("\(userSelf.userId)-\(userOpposite.userId)").order(by: "createTime", descending: true).getDocuments() { (querySnapshot, err) in
                 if let err = err {
                     print("Error getting documents: \(err)")
                 } else {
                     
-                    querySnapshot!.documents.forEach({ doc in
-                        let chatItem = ChatItem(id: doc.data()["id"] as! Int, userSelfId: doc.data()["userSelfId"] as! String, userOppositeId: doc.data()["userOppositeId"] as! String, message: doc.data()["message"] as! String, type: doc.data()["type"] as! Int, createTime: doc.data()["createTime"] as! Int)
+                    guard let querySnapshot = querySnapshot else {
+                        return
+                    }
+                    querySnapshot.documents.forEach({ doc in
+                        let chatItem = ChatItem(id: doc.data()["id"] as? Int ?? 0, userSelfId: doc.data()["userSelfId"] as? String ?? "", userOppositeId: doc.data()["userOppositeId"] as? String ?? "", message: doc.data()["message"] as? String ?? "", type: doc.data()["type"] as? Int ?? 0, createTime: doc.data()["createTime"] as? Int ?? 0)
                         
                         self.listChat.append(chatItem)
                         
@@ -71,6 +83,13 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
             return
         }
         
+        guard let userOpposite = self.userOpposite else {
+            return
+        }
+        guard let userSelf = self.userSelf else {
+            return
+        }
+        
         let timeStamp = Int(Date().timeIntervalSince1970)
         
         let itemChat: [String: Any] = [
@@ -78,11 +97,11 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
             "id": timeStamp,
             "message": mess,
             "type": 2,
-            "userOppositeId": self.userOpposite.userId,
-            "userSelfId": self.userSelf.userId
+            "userOppositeId": userOpposite.userId,
+            "userSelfId": userSelf.userId
         ]
         
-        db.collection("chat_group").document("\(self.userSelf.username)-\(self.userSelf.userId)").collection("\(self.userSelf.userId)-\(self.userOpposite.userId)").addDocument(data: itemChat)
+        db.collection("chat_group").document("\(userSelf.username)-\(userSelf.userId)").collection("\(userSelf.userId)-\(userOpposite.userId)").addDocument(data: itemChat)
         
         // add Another document for opposite
         let itemChatOpposite: [String: Any] = [
@@ -90,14 +109,14 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
             "id": timeStamp,
             "message": mess,
             "type": 1,
-            "userOppositeId": self.userSelf.userId,
-            "userSelfId": self.userOpposite.userId
+            "userOppositeId": userSelf.userId,
+            "userSelfId": userOpposite.userId
         ]
-        db.collection("chat_group").document("\(self.userOpposite.username)-\(self.userOpposite.userId)").collection("\(self.userOpposite.userId)-\(self.userSelf.userId)")
+        db.collection("chat_group").document("\(userOpposite.username)-\(userOpposite.userId)").collection("\(userOpposite.userId)-\(userSelf.userId)")
             .addDocument(data: itemChatOpposite)
         
         // insert to table view
-        let item = ChatItem(id: timeStamp, userSelfId: self.userSelf.userId, userOppositeId: self.userOpposite.userId, message: mess, type: 2, createTime: timeStamp)
+        let item = ChatItem(id: timeStamp, userSelfId: userSelf.userId, userOppositeId: userOpposite.userId, message: mess, type: 2, createTime: timeStamp)
         self.listChat.insert(item, at: 0)
         textFieldMessage.text = ""
         
@@ -128,6 +147,14 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
             return
         }
         
+        guard let userOpposite = self.userOpposite else {
+            return
+        }
+        
+        guard let userSelf = self.userSelf else {
+            return
+        }
+        
         
         storage.child("images/file.png").putData(imageData, metadata: nil, completion: {_ , error in
             guard error == nil else {
@@ -147,13 +174,13 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         
         
         let timeStamp = Int(Date().timeIntervalSince1970)
-        storage.child("images/img_chat_\(self.userSelf.userId)_\(self.userOpposite.userId)_\(timeStamp).png").putData(imageData, metadata: nil, completion: {_, error in
+        storage.child("images/img_chat_\(userSelf.userId)_\(userOpposite.userId)_\(timeStamp).png").putData(imageData, metadata: nil, completion: {_, error in
             guard error == nil else {
                 print("Failed to upload")
                 return
             }
             
-            self.storage.child("images/img_chat_\(self.userSelf.userId)_\(self.userOpposite.userId)_\(timeStamp).png").downloadURL(completion: {url, error in
+            self.storage.child("images/img_chat_\(userSelf.userId)_\(userOpposite.userId)_\(timeStamp).png").downloadURL(completion: {url, error in
                 guard let url = url, error == nil else {
                     return
                 }
@@ -167,11 +194,11 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
                     "id": timeStamp,
                     "message": urlString,
                     "type": 4,
-                    "userOppositeId": self.userOpposite.userId,
-                    "userSelfId": self.userSelf.userId
+                    "userOppositeId": userOpposite.userId,
+                    "userSelfId": userSelf.userId
                 ]
                 
-                self.db.collection("chat_group").document("\(self.userSelf.username)-\(self.userSelf.userId)").collection("\(self.userSelf.userId)-\(self.userOpposite.userId)").addDocument(data: itemChat)
+                self.db.collection("chat_group").document("\(userSelf.username)-\(userSelf.userId)").collection("\(userSelf.userId)-\(userOpposite.userId)").addDocument(data: itemChat)
                 
                 // add Another document for opposite
                 let itemChatOpposite: [String: Any] = [
@@ -179,14 +206,14 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
                     "id": timeStamp,
                     "message": urlString,
                     "type": 3,
-                    "userOppositeId": self.userSelf.userId,
-                    "userSelfId": self.userOpposite.userId
+                    "userOppositeId": userSelf.userId,
+                    "userSelfId": userOpposite.userId
                 ]
-                self.db.collection("chat_group").document("\(self.userOpposite.username)-\(self.userOpposite.userId)").collection("\(self.userOpposite.userId)-\(self.userSelf.userId)")
+                self.db.collection("chat_group").document("\(userOpposite.username)-\(userOpposite.userId)").collection("\(userOpposite.userId)-\(userSelf.userId)")
                     .addDocument(data: itemChatOpposite)
                 
                 // insert to tableview
-                let item = ChatItem(id: timeStamp, userSelfId: self.userSelf.userId, userOppositeId: self.userOpposite.userId, message: urlString, type: 4, createTime: timeStamp)
+                let item = ChatItem(id: timeStamp, userSelfId: userSelf.userId, userOppositeId: userOpposite.userId, message: urlString, type: 4, createTime: timeStamp)
                 self.textFieldMessage.text = ""
                 self.listChat.insert(item, at: 0)
                 self.tableViewChat.reloadData()

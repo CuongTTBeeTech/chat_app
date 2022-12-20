@@ -15,7 +15,7 @@ class ListUsersViewController: UIViewController {
     @IBOutlet weak var tableViewUsers: UITableView!
     
     var username: String = ""
-    var userId: String!
+    var userId: String = ""
     var listUsers: [User] = []
     
     override func viewDidLoad() {
@@ -35,8 +35,12 @@ class ListUsersViewController: UIViewController {
                     print("Error getting documents: \(err)")
                 } else {
                     
-                    querySnapshot!.documents.forEach({ doc in
-                        let userDoc = User(userId: doc.documentID, username: doc.data()["username"] as! String)
+                    guard let querySnapshot = querySnapshot else {
+                        return
+                    }
+                    
+                    querySnapshot.documents.forEach({ doc in
+                        let userDoc = User(userId: doc.documentID, username: doc.data()["username"] as? String ?? "")
                         if self.userId != doc.documentID {
                             self.listUsers.append(userDoc)
                         }

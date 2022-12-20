@@ -40,14 +40,19 @@ class ViewController: UIViewController {
                     self.showAlert(title: "Alert", message: "Error getting documents: \(err)")
                 } else {
                     
-                    if querySnapshot!.documents.count == 0 {
+                    guard let querySnapshot = querySnapshot else {
+                        return
+                    }
+                    if querySnapshot.documents.count == 0 {
                         self.showAlert(title: "Alert", message: "No user found")
                         return
                     }
                     
-                    let vc = self.storyboard?.instantiateViewController(identifier: "users") as! ListUsersViewController
-                    vc.username = querySnapshot!.documents[0]["username"] as! String
-                    vc.userId = querySnapshot!.documents[0].documentID
+                    guard let vc = self.storyboard?.instantiateViewController(identifier: "users") as? ListUsersViewController else {
+                        return
+                    }
+                    vc.username = querySnapshot.documents[0]["username"] as? String ?? ""
+                    vc.userId = querySnapshot.documents[0].documentID
                     self.navigationController?.pushViewController(vc, animated: true)
                     
                 }

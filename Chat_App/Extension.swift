@@ -52,7 +52,9 @@ extension ChatViewController: UITableViewDataSource, UITableViewDelegate {
         
         switch listChat[indexPath.row].type {
         case 1:
-            let oppositeCellText = tableView.dequeueReusableCell(withIdentifier: "opposite_text", for: indexPath) as! OppositeTextMessageTableViewCell
+            guard let oppositeCellText = tableView.dequeueReusableCell(withIdentifier: "opposite_text", for: indexPath) as? OppositeTextMessageTableViewCell else {
+                return UITableViewCell()
+            }
             // message
             oppositeCellText.lbMessage?.text = listChat[indexPath.row].message
             let fixedWidth = oppositeCellText.lbMessage.frame.size.width
@@ -64,7 +66,9 @@ extension ChatViewController: UITableViewDataSource, UITableViewDelegate {
             oppositeCellText.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
             return oppositeCellText
         case 2:
-            let selfCellText = tableView.dequeueReusableCell(withIdentifier: "self_text", for: indexPath) as! SelfTextMessageTableViewCell
+            guard let selfCellText = tableView.dequeueReusableCell(withIdentifier: "self_text", for: indexPath) as? SelfTextMessageTableViewCell else {
+                return UITableViewCell()
+            }
             // message
             selfCellText.lbMessage?.text = listChat[indexPath.row].message
             let fixedWidth = selfCellText.lbMessage.frame.size.width
@@ -76,22 +80,30 @@ extension ChatViewController: UITableViewDataSource, UITableViewDelegate {
             selfCellText.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
             return selfCellText
         case 3:
-            let oppositeCellImage = tableView.dequeueReusableCell(withIdentifier: "opposite_img", for: indexPath) as! OppositeImageMessageTableViewCell
+            guard let oppositeCellImage = tableView.dequeueReusableCell(withIdentifier: "opposite_img", for: indexPath) as? OppositeImageMessageTableViewCell else {
+                return UITableViewCell()
+            }
             // image
             let urlString = listChat[indexPath.row].message
-            let url = URL(string: urlString)
-            oppositeCellImage.img.af.setImage(withURL: url!)
+            guard let url = URL(string: urlString) else {
+                return UITableViewCell()
+            }
+            oppositeCellImage.img.af.setImage(withURL: url)
             // create time
             let createTime: String = String(String(describing: NSDate(timeIntervalSince1970: TimeInterval(listChat[indexPath.row].createTime))).dropLast(5))
             oppositeCellImage.labelCreateTime.text = createTime
             oppositeCellImage.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
             return oppositeCellImage
         case 4:
-            let selfCellImage = tableView.dequeueReusableCell(withIdentifier: "self_img", for: indexPath) as! SelfImageMessageTableViewCell
+            guard let selfCellImage = tableView.dequeueReusableCell(withIdentifier: "self_img", for: indexPath) as? SelfImageMessageTableViewCell else {
+                return UITableViewCell()
+            }
             // image
             let urlString = listChat[indexPath.row].message
-            let url = URL(string: urlString)
-            selfCellImage.img.af.setImage(withURL: url!)
+            guard let url = URL(string: urlString) else {
+                return UITableViewCell()
+            }
+            selfCellImage.img.af.setImage(withURL: url)
             // create time
             let createTime: String = String(String(describing: NSDate(timeIntervalSince1970: TimeInterval(listChat[indexPath.row].createTime))).dropLast(5))
             selfCellImage.labelCreateTime.text = createTime
@@ -144,7 +156,9 @@ extension ListUsersViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        let vc = storyboard?.instantiateViewController(identifier: "chat") as! ChatViewController
+        guard let vc = storyboard?.instantiateViewController(identifier: "chat") as? ChatViewController else {
+            return
+        }
         vc.userOpposite = User(userId: listUsers[indexPath.row].userId, username: listUsers[indexPath.row].username)
         vc.userSelf = User(userId: self.userId, username: self.username)
         navigationController?.pushViewController(vc, animated: true)
