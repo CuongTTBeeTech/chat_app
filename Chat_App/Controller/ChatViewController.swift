@@ -56,7 +56,8 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
             return
         }
         db.collection("chat_group").document("\(userSelf.username)-\(userSelf.userId)")
-            .collection("\(userSelf.userId)-\(userOpposite.userId)").order(by: "createTime", descending: true).getDocuments() { (querySnapshot, err) in
+            .collection("\(userSelf.userId)-\(userOpposite.userId)").order(by: "createTime", descending: true).getDocuments() {[weak self] (querySnapshot, err) in
+                
                 if let err = err {
                     print("Error getting documents: \(err)")
                 } else {
@@ -67,11 +68,11 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
                     querySnapshot.documents.forEach({ doc in
                         let chatItem = ChatItem(id: doc.data()["id"] as? Int ?? 0, userSelfId: doc.data()["userSelfId"] as? String ?? "", userOppositeId: doc.data()["userOppositeId"] as? String ?? "", message: doc.data()["message"] as? String ?? "", type: doc.data()["type"] as? Int ?? 0, createTime: doc.data()["createTime"] as? Int ?? 0)
                         
-                        self.listChat.append(chatItem)
+                        self?.listChat.append(chatItem)
                         
                     })
                     
-                    self.tableViewChat.reloadData()
+                    self?.tableViewChat.reloadData()
                 }
             }
     }
@@ -156,13 +157,13 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         }
         
         
-        storage.child("images/file.png").putData(imageData, metadata: nil, completion: {_ , error in
+        storage.child("images/file.png").putData(imageData, metadata: nil, completion: { [weak self] _ , error in
             guard error == nil else {
                 print("Failed to upload")
                 return
             }
             
-            self.storage.child("images/file.png").downloadURL(completion: {url, error in
+            self?.storage.child("images/file.png").downloadURL(completion: {url, error in
                 guard let url = url, error == nil else {
                     return
                 }
@@ -174,13 +175,13 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         
         
         let timeStamp = Int(Date().timeIntervalSince1970)
-        storage.child("images/img_chat_\(userSelf.userId)_\(userOpposite.userId)_\(timeStamp).png").putData(imageData, metadata: nil, completion: {_, error in
+        storage.child("images/img_chat_\(userSelf.userId)_\(userOpposite.userId)_\(timeStamp).png").putData(imageData, metadata: nil, completion: { [weak self] _, error in
             guard error == nil else {
                 print("Failed to upload")
                 return
             }
             
-            self.storage.child("images/img_chat_\(userSelf.userId)_\(userOpposite.userId)_\(timeStamp).png").downloadURL(completion: {url, error in
+            self?.storage.child("images/img_chat_\(userSelf.userId)_\(userOpposite.userId)_\(timeStamp).png").downloadURL(completion: {url, error in
                 guard let url = url, error == nil else {
                     return
                 }
@@ -198,7 +199,7 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
                     "userSelfId": userSelf.userId
                 ]
                 
-                self.db.collection("chat_group").document("\(userSelf.username)-\(userSelf.userId)").collection("\(userSelf.userId)-\(userOpposite.userId)").addDocument(data: itemChat)
+                self?.db.collection("chat_group").document("\(userSelf.username)-\(userSelf.userId)").collection("\(userSelf.userId)-\(userOpposite.userId)").addDocument(data: itemChat)
                 
                 // add Another document for opposite
                 let itemChatOpposite: [String: Any] = [
@@ -209,14 +210,14 @@ class ChatViewController: UIViewController, UIImagePickerControllerDelegate, UIN
                     "userOppositeId": userSelf.userId,
                     "userSelfId": userOpposite.userId
                 ]
-                self.db.collection("chat_group").document("\(userOpposite.username)-\(userOpposite.userId)").collection("\(userOpposite.userId)-\(userSelf.userId)")
+                self?.db.collection("chat_group").document("\(userOpposite.username)-\(userOpposite.userId)").collection("\(userOpposite.userId)-\(userSelf.userId)")
                     .addDocument(data: itemChatOpposite)
                 
                 // insert to tableview
                 let item = ChatItem(id: timeStamp, userSelfId: userSelf.userId, userOppositeId: userOpposite.userId, message: urlString, type: 4, createTime: timeStamp)
-                self.textFieldMessage.text = ""
-                self.listChat.insert(item, at: 0)
-                self.tableViewChat.reloadData()
+                self?.textFieldMessage.text = ""
+                self?.listChat.insert(item, at: 0)
+                self?.tableViewChat.reloadData()
             })
         })
         

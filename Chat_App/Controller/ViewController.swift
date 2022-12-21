@@ -35,25 +35,25 @@ class ViewController: UIViewController {
         }
         
         db.collection("users").whereField("username", isEqualTo: username).whereField("password", isEqualTo: password)
-            .getDocuments() { (querySnapshot, err) in
+            .getDocuments() { [weak self] (querySnapshot, err) in
                 if let err = err {
-                    self.showAlert(title: "Alert", message: "Error getting documents: \(err)")
+                    self?.showAlert(title: "Alert", message: "Error getting documents: \(err)")
                 } else {
                     
                     guard let querySnapshot = querySnapshot else {
                         return
                     }
                     if querySnapshot.documents.count == 0 {
-                        self.showAlert(title: "Alert", message: "No user found")
+                        self?.showAlert(title: "Alert", message: "No user found")
                         return
                     }
                     
-                    guard let vc = self.storyboard?.instantiateViewController(identifier: "users") as? ListUsersViewController else {
+                    guard let vc = self?.storyboard?.instantiateViewController(identifier: "users") as? ListUsersViewController else {
                         return
                     }
                     vc.username = querySnapshot.documents[0]["username"] as? String ?? ""
                     vc.userId = querySnapshot.documents[0].documentID
-                    self.navigationController?.pushViewController(vc, animated: true)
+                    self?.navigationController?.pushViewController(vc, animated: true)
                     
                 }
         }

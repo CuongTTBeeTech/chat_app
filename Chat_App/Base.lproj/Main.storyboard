@@ -187,7 +187,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" editable="NO" text="opposite message" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cmp-Ls-yly">
-                                                    <rect key="frame" x="10" y="17" width="303" height="33"/>
+                                                    <rect key="frame" x="10" y="17" width="128" height="33"/>
                                                     <color key="backgroundColor" systemColor="systemGray4Color"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" id="N9E-dp-8ny"/>
@@ -202,7 +202,7 @@
                                                 <constraint firstItem="A13-rz-j4O" firstAttribute="centerX" secondItem="ABK-Vz-EJF" secondAttribute="centerX" id="5vp-7y-wf3"/>
                                                 <constraint firstItem="cmp-Ls-yly" firstAttribute="leading" secondItem="ABK-Vz-EJF" secondAttribute="leading" constant="10" id="I2v-T5-zb1"/>
                                                 <constraint firstItem="cmp-Ls-yly" firstAttribute="top" secondItem="A13-rz-j4O" secondAttribute="bottom" constant="5" id="fRw-a6-StQ"/>
-                                                <constraint firstAttribute="trailing" secondItem="cmp-Ls-yly" secondAttribute="trailing" constant="80" id="hHd-2d-5OI"/>
+                                                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="cmp-Ls-yly" secondAttribute="trailing" constant="80" id="hHd-2d-5OI"/>
                                                 <constraint firstItem="A13-rz-j4O" firstAttribute="top" secondItem="ABK-Vz-EJF" secondAttribute="top" id="tPv-pc-7B3"/>
                                             </constraints>
                                         </tableViewCellContentView>
@@ -225,7 +225,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" editable="NO" text="my message" textAlignment="right" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HuC-tz-4qY">
-                                                    <rect key="frame" x="80" y="17" width="303" height="33"/>
+                                                    <rect key="frame" x="292" y="17" width="91" height="33"/>
                                                     <color key="backgroundColor" systemColor="systemBlueColor"/>
                                                     <color key="textColor" systemColor="systemBackgroundColor"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -237,7 +237,7 @@
                                                 <constraint firstAttribute="bottom" secondItem="HuC-tz-4qY" secondAttribute="bottom" constant="10" id="CbY-i2-1de"/>
                                                 <constraint firstItem="wCT-T4-z6M" firstAttribute="centerX" secondItem="f6P-v3-AEN" secondAttribute="centerX" id="NTP-Ja-Ea7"/>
                                                 <constraint firstItem="wCT-T4-z6M" firstAttribute="top" secondItem="f6P-v3-AEN" secondAttribute="top" id="S02-Ey-ksf"/>
-                                                <constraint firstItem="HuC-tz-4qY" firstAttribute="leading" secondItem="f6P-v3-AEN" secondAttribute="leading" constant="80" id="XXH-Vg-Laq"/>
+                                                <constraint firstItem="HuC-tz-4qY" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="f6P-v3-AEN" secondAttribute="leading" constant="80" id="XXH-Vg-Laq"/>
                                                 <constraint firstAttribute="trailing" secondItem="HuC-tz-4qY" secondAttribute="trailing" constant="10" id="rNv-rs-Qia"/>
                                             </constraints>
                                         </tableViewCellContentView>

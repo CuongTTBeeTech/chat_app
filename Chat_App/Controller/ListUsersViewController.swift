@@ -30,7 +30,7 @@ class ListUsersViewController: UIViewController {
         
         let db = Firestore.firestore()
         db.collection("users")
-            .getDocuments() { (querySnapshot, err) in
+            .getDocuments() { [weak self] (querySnapshot, err) in
                 if let err = err {
                     print("Error getting documents: \(err)")
                 } else {
@@ -41,12 +41,12 @@ class ListUsersViewController: UIViewController {
                     
                     querySnapshot.documents.forEach({ doc in
                         let userDoc = User(userId: doc.documentID, username: doc.data()["username"] as? String ?? "")
-                        if self.userId != doc.documentID {
-                            self.listUsers.append(userDoc)
+                        if self?.userId != doc.documentID {
+                            self?.listUsers.append(userDoc)
                         }
                     })
                     
-                    self.tableViewUsers.reloadData()
+                    self?.tableViewUsers.reloadData()
                 }
         }
     }
