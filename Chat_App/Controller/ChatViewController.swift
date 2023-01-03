@@ -40,9 +40,6 @@ class ChatViewController: UIViewController {
         
         // bind listChat to tableView
         self.chatViewModel.listChatLiveData.bind(to: self.tableViewChat.rx.items(dataSource: self.dataSource())).disposed(by: disposeBag)
-        self.chatViewModel.listChatLiveData.subscribe(onNext: { _ in
-            self.tableViewChat.setContentOffset(.zero, animated: true)
-        }).disposed(by: disposeBag)
         
         
         // binding inputText to textField
@@ -62,6 +59,7 @@ class ChatViewController: UIViewController {
         
         chatViewModel.sendTextMessage(mess: mes, onCompletion: {[weak self] in
             self?.textFieldMessage.text = ""
+            self?.tableViewChat.scrollToTop()
         })
     }
     
@@ -89,7 +87,7 @@ extension ChatViewController: UIImagePickerControllerDelegate, UINavigationContr
         }
         
         self.chatViewModel.sendImageMessage(image: image, onCompletion: {[weak self] in
-            self?.textFieldMessage.text = ""
+            self?.tableViewChat.scrollToTop()
         })
         
     }
