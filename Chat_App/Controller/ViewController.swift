@@ -9,20 +9,62 @@ import UIKit
 import FirebaseCore
 import FirebaseFirestore
 import FirebaseAuth
+import RxSwift
+import RxCocoa
 
 class ViewController: UIViewController {
     
     @IBOutlet weak var tfUsername: UITextField!
-    
     @IBOutlet weak var tfPassword: UITextField!
     
+    @IBOutlet weak var labelValidateUsername: UILabel!
+    @IBOutlet weak var labelValidatePassword: UILabel!
+    
     let db = Firestore.firestore()
+    
+    private var usernameLiveData = BehaviorRelay(value: "")
+    private var passwordLiveData = BehaviorRelay(value: "")
+    
+    
+    private let disposeBag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
+        bindUI()
+    }
+    
+    func bindUI() {
+        // bind textField username to usernameLiveData
+        self.tfUsername.rx.text.orEmpty
+            .delay(.milliseconds(500), scheduler: MainScheduler.instance)
+            .asObservable()
+            .bind(to: self.usernameLiveData)
+            .disposed(by: disposeBag)
         
+        self.usernameLiveData.asObservable().subscribe(onNext: {[weak self] text in
+            if text.isEmpty {
+                self?.validateUsername(isValidated: false)
+            } else {
+                self?.validateUsername(isValidated: true)
+            }
+        }).disposed(by: disposeBag)
+        
+        // bind textField password to passwordLiveData
+        self.tfPassword.rx.text.orEmpty
+            .delay(.milliseconds(500), scheduler: MainScheduler.instance)
+            .asObservable()
+            .bind(to: self.passwordLiveData)
+            .disposed(by: disposeBag)
+        
+        self.passwordLiveData.asObservable().subscribe(onNext: {[weak self] text in
+            if text.isEmpty {
+                self?.validatePassword(isValidated: false)
+            } else {
+                self?.validatePassword(isValidated: true)
+            }
+        }).disposed(by: disposeBag)
     }
     
     @IBAction func btnLoginClick(_ sender: Any) {
@@ -33,6 +75,8 @@ class ViewController: UIViewController {
             showAlert(title: "Alert", message: "Missing required field")
             return
         }
+        
+        
         
         db.collection("users").whereField("username", isEqualTo: username).whereField("password", isEqualTo: password)
             .getDocuments() { [weak self] (querySnapshot, err) in
@@ -57,10 +101,28 @@ class ViewController: UIViewController {
                     
                 }
         }
-   
         
         
     }
     
 }
 
+extension ViewController {
+    func validateUsername(isValidated: Bool) {
+        if !isValidated {
+            self.labelValidateUsername.isHidden = false
+        } else {
+            self.labelValidateUsername.isHidden = true
+            self.labelValidateUsername.text = "Username is required"
+        }
+    }
+    
+    func validatePassword(isValidated: Bool) {
+        if !isValidated {
+            self.labelValidatePassword.isHidden = false
+        } else {
+            self.labelValidatePassword.isHidden = true
+            self.labelValidatePassword.text = "Password is required"
+        }
+    }
+}
