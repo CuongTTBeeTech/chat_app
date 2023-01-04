@@ -6,27 +6,18 @@
 //
 
 import UIKit
-import FirebaseCore
-import FirebaseFirestore
-import FirebaseAuth
 import RxSwift
-import RxCocoa
 
-class ViewController: UIViewController {
+class LoginViewController: UIViewController {
     
     @IBOutlet weak var tfUsername: UITextField!
     @IBOutlet weak var tfPassword: UITextField!
-    
     @IBOutlet weak var labelValidateUsername: UILabel!
     @IBOutlet weak var labelValidatePassword: UILabel!
     
-    let db = Firestore.firestore()
-    
-    private var usernameLiveData = BehaviorRelay(value: "")
-    private var passwordLiveData = BehaviorRelay(value: "")
-    
-    
     private let disposeBag = DisposeBag()
+    
+    let viewModel = LoginViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,10 +31,10 @@ class ViewController: UIViewController {
         self.tfUsername.rx.text.orEmpty
             .delay(.milliseconds(500), scheduler: MainScheduler.instance)
             .asObservable()
-            .bind(to: self.usernameLiveData)
+            .bind(to: self.viewModel.usernameLiveData)
             .disposed(by: disposeBag)
         
-        self.usernameLiveData.asObservable().subscribe(onNext: {[weak self] text in
+        self.viewModel.usernameLiveData.asObservable().subscribe(onNext: {[weak self] text in
             if text.isEmpty {
                 self?.validateUsername(isValidated: false)
             } else {
@@ -55,10 +46,10 @@ class ViewController: UIViewController {
         self.tfPassword.rx.text.orEmpty
             .delay(.milliseconds(500), scheduler: MainScheduler.instance)
             .asObservable()
-            .bind(to: self.passwordLiveData)
+            .bind(to: self.viewModel.passwordLiveData)
             .disposed(by: disposeBag)
         
-        self.passwordLiveData.asObservable().subscribe(onNext: {[weak self] text in
+        self.viewModel.passwordLiveData.asObservable().subscribe(onNext: {[weak self] text in
             if text.isEmpty {
                 self?.validatePassword(isValidated: false)
             } else {
@@ -76,38 +67,25 @@ class ViewController: UIViewController {
             return
         }
         
+        viewModel.login(username: username, password: password, onError: {[weak self] error in
+            self?.showAlert(title: "Alert", message: "Error: \(String(describing: error))")
+        }, onCompletion: {[weak self] querySnapshot in
+            guard let vc = self?.storyboard?.instantiateViewController(identifier: "users") as? ListUsersViewController else {
+                return
+            }
+            vc.viewModel.username = querySnapshot.documents[0]["username"] as? String ?? ""
+            vc.viewModel.userId = querySnapshot.documents[0].documentID
+            self?.navigationController?.pushViewController(vc, animated: true)
+        })
         
-        
-        db.collection("users").whereField("username", isEqualTo: username).whereField("password", isEqualTo: password)
-            .getDocuments() { [weak self] (querySnapshot, err) in
-                if let err = err {
-                    self?.showAlert(title: "Alert", message: "Error getting documents: \(err)")
-                } else {
-                    
-                    guard let querySnapshot = querySnapshot else {
-                        return
-                    }
-                    if querySnapshot.documents.count == 0 {
-                        self?.showAlert(title: "Alert", message: "No user found")
-                        return
-                    }
-                    
-                    guard let vc = self?.storyboard?.instantiateViewController(identifier: "users") as? ListUsersViewController else {
-                        return
-                    }
-                    vc.username = querySnapshot.documents[0]["username"] as? String ?? ""
-                    vc.userId = querySnapshot.documents[0].documentID
-                    self?.navigationController?.pushViewController(vc, animated: true)
-                    
-                }
-        }
+    
         
         
     }
     
 }
 
-extension ViewController {
+extension LoginViewController {
     func validateUsername(isValidated: Bool) {
         if !isValidated {
             self.labelValidateUsername.isHidden = false
