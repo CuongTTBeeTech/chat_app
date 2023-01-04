@@ -13,5 +13,9 @@ pod 'FirebaseAuth'
 pod 'FirebaseStorage'
 pod 'AlamofireImage'
 pod 'Alamofire'
+pod 'Kingfisher'
+pod 'RxSwift'
+pod 'RxCocoa'
+pod 'RxDataSources'
 
 end
