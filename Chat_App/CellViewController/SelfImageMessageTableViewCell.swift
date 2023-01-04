@@ -35,19 +35,10 @@ class SelfImageMessageTableViewCell: UITableViewCell {
         guard let url = URL(string: urlString) else {
             return
         }
-        //            selfCellImage.img.af.setImage(withURL: url)
         img.kf.setImage(with: url)
         // create time
-        let date = Date(timeIntervalSince1970: Double(item.createTime))
-        let dateFormatter = DateFormatter()
-        dateFormatter.timeZone = TimeZone(abbreviation: "GMT+7")
-        dateFormatter.locale = NSLocale.current
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-        let strDate = dateFormatter.string(from: date)
-        labelCreateTime?.text = strDate
+        labelCreateTime?.text = item.createTime.toStringDate()
         
-//        let createTime: String = String(String(describing: NSDate(timeIntervalSince1970: TimeInterval(item.createTime))).dropLast(5))
-//        labelCreateTime.text = createTime
         transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
     }
 }

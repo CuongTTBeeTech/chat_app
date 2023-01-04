@@ -36,16 +36,8 @@ class OppositeTextMessageTableViewCell: UITableViewCell {
         let newSize = lbMessage.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude))
         lbMessage.frame.size = CGSize(width: max(newSize.width, fixedWidth), height: newSize.height)
         // create time
-        let date = Date(timeIntervalSince1970: Double(item.createTime))
-        let dateFormatter = DateFormatter()
-        dateFormatter.timeZone = TimeZone(abbreviation: "GMT+7")
-        dateFormatter.locale = NSLocale.current
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-        let strDate = dateFormatter.string(from: date)
-        lbCreateTime?.text = strDate
+        lbCreateTime?.text = item.createTime.toStringDate()
         
-//        let createTime: String = String(String(describing: NSDate(timeIntervalSince1970: TimeInterval(item.createTime))).dropLast(5))
-//        lbCreateTime?.text = createTime
         transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
     }
 }

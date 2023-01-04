@@ -83,3 +83,23 @@ extension UITableView {
         return indexPath.section < self.numberOfSections && indexPath.row < self.numberOfRows(inSection: indexPath.section)
     }
 }
+
+extension Int {
+    func toStringDate() -> String {
+        
+        let date = Date(timeIntervalSince1970: Double(self))
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = TimeZone(abbreviation: "GMT+7")
+        dateFormatter.locale = NSLocale.current
+        let currentYear = Calendar.current.dateComponents([.year], from: Date()).year
+        let createYear = Calendar.current.dateComponents([.year], from: date).year
+        if currentYear == createYear {
+            dateFormatter.dateFormat = "MM-dd HH:mm"
+        } else {
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+        }
+        let strDate = dateFormatter.string(from: date)
+        
+        return strDate
+    }
+}
