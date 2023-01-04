@@ -115,9 +115,10 @@ class ChatViewModel: NSObject {
                 
                 // insert to tableview
                 let item = ChatItem(id: timeStamp, userSelfId: userSelf.userId, userOppositeId: userOpposite.userId, message: urlString, type: 4, createTime: timeStamp)
-                onCompletion()
+                
                 self?.listChat.insert(item, at: 0)
                 self?.listChatLiveData.accept([MultipleSectionModel(original: .TypeSelfText(type: 4, items: [item]), items: [item])] + (self?.listChatLiveData.value ?? []))
+                onCompletion()
             })
         })
     }
